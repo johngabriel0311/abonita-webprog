@@ -1,32 +1,42 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+// HomePage Structure
+import Layout from "./components/Layout";
+import ArticlePage from "./pages/ArticlePage";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+
+const routes = [
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        path: "",
+        element: <HomePage />,
+      },
+      {
+        path: "about",
+        element: <AboutPage />,
+      },
+      {
+        path: "articles",
+        element: <ArticlePage />,
+      },
+    ],
+  },
+];
+
+const router = createBrowserRouter(routes);
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome to My React App!</h1>
-        <img src="src/assets/chip.png" alt="chip" />
-        <p>
-          Name: [John Gabriel Abonita]
-          <br />
-          Email: [abonitajs@students.national-u.edu.ph]
-          <br />
-          Course: [BSIT-MWA]
-          <br />
-          <a
-            href="https://github.com/johngabriel0311/abonita-webprog"
-            target="_"
-          >
-            Github Repository
-          </a>
-        </p>
-      </header>
-    </div>
+    <>
+      <RouterProvider router={router} />
+    </>
   );
 }
+
 export default App;
 
 // cd abonita-client
