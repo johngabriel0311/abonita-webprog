@@ -1,118 +1,74 @@
+import { useParams } from "react-router-dom";
 import Button from "../components/Button";
+import articles from "../assets/article-content.js";
 
-const ArticlePage = () => {
+function ArticlePage() {
+  const { name } = useParams();
+  const article = articles.find((article) => article.name === name);
+
+  if (!article) {
+    return (
+      <div className="flex w-full flex-col gap-6">
+        <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-3xl font-bold text-zinc-900">
+              Article not found
+            </h1>
+            <Button to="/articles" className="mt-6">
+              Back to Articles
+            </Button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex w-full flex-col gap-6">
-      <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
-          Gameplay
+    <div className="bg-zinc-100 min-h-screen text-zinc-900">
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+        <Button to="/articles">Back to Articles</Button>
+
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
+          Element
         </p>
-        <h1 className="max-w-xl text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl">
-          E-Learning Gamification
-        </h1>
-        <p className="mt-4 max-w-lg text-sm leading-7 text-zinc-600 sm:text-base">
-          Gamification has been widely recognized as an effective approach to
-          increase student engagement in e-learning environments by integrating
-          game elements such as points, badges, and challenges into educational
-          content.
+
+        <h1 className="text-3xl font-bold mt-2">{article.title}</h1>
+
+        <p className="text-sm text-zinc-500 mt-1">
+          {article.name
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}
         </p>
-        <div className="mt-6">
-          <Button to="/">Back Home</Button>
+      </div>
+
+      <div className="border-t-2 border-zinc-900 mt-6"></div>
+      <div className="border-t-2 border-zinc-900 mt-1"></div>
+
+      <div className="max-w-4xl mx-auto px-6 py-10 text-center">
+        <img
+          src={article.image}
+          alt={article.title}
+          className="w-full h-[480px] object-cover rounded-2xl border-2 border-zinc-900"
+        />
+
+        <div className="mt-6 space-y-4 text-left">
+          {article.content.map((paragraph, index) => (
+            <p
+              key={index}
+              className="text-sm leading-7 text-zinc-700 whitespace-pre-wrap"
+            >
+              {paragraph}
+            </p>
+          ))}
         </div>
-      </section>
 
-      <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
-            Featured Modules
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
-            Game Elements
-          </h2>
+        <div className="mt-8 border-t-2 border-zinc-900 pt-6 flex justify-start">
+          <Button to="/articles">Back to Articles</Button>
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
-            <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-              <img
-                src="src/assets/images/levels.png"
-                alt="Color"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-              Element 01
-            </p>
-            <h3 className="mt-2 text-lg font-semibold text-zinc-900">
-              Educational Levels
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              Includes tasks related to CSS.
-            </p>
-            <Button className="mt-4">Read More</Button>
-          </article>
-
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
-            <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-              <img
-                src="src/assets/images/quiz.png"
-                alt="Quiz Assessment"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-              Element 02
-            </p>
-            <h3 className="mt-2 text-lg font-semibold text-zinc-900">
-              Quiz Assessment
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              Presents multiple-choice questions about the level.
-            </p>
-            <Button className="mt-4">Read More</Button>
-          </article>
-
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
-            <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-              <img
-                src="src/assets/images/leaderboards.png"
-                alt="Leaderboards"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-              Element 03
-            </p>
-            <h3 className="mt-2 text-lg font-semibold text-zinc-900">
-              Leaderboards
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              Shows the names of the top players.
-            </p>
-            <Button className="mt-4">Read More</Button>
-          </article>
-
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
-            <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-              <img
-                src="src/assets/images/badge.png"
-                alt="Badges"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-              Element 04
-            </p>
-            <h3 className="mt-2 text-lg font-semibold text-zinc-900">Badges</h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              See all the special badges earned.
-            </p>
-            <Button className="mt-4">Read More</Button>
-          </article>
-        </div>
-      </section>
+      </div>
     </div>
   );
-};
+}
 
 export default ArticlePage;
