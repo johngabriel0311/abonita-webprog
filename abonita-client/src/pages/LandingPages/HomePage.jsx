@@ -1,4 +1,4 @@
-import Button from "../components/Button";
+import Button from "../../components/Button";
 
 const HomePage = () => {
   return (
@@ -90,7 +90,7 @@ const HomePage = () => {
           <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
             <div className="overflow-hidden rounded-[1.25rem]">
               <img
-                src="src/assets/images/signup.png"
+                src="src/assets/images/sign.png"
                 alt="Feature"
                 className="w-full h-full object-cover aspect-[4/3]"
               />

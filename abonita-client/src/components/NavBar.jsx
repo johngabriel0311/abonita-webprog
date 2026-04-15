@@ -4,15 +4,17 @@ const links = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
   { label: "Gameplay", to: "/articles" },
+  {
+    label: "Sign In",
+    to: "/auth/signin",
+    hover: "hover:bg-[#253b80] hover:text-white",
+  },
+  {
+    label: "Sign Up",
+    to: "/auth/signup",
+    hover: "hover:bg-[#cd45a1] hover:text-white",
+  },
 ];
-
-const navLinkClassName = ({ isActive }) =>
-  [
-    "rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-all duration-300",
-    isActive
-      ? "bg-white text-black shadow-md"
-      : "text-zinc-400 hover:text-white hover:bg-white/10",
-  ].join(" ");
 
 const NavBar = () => {
   return (
@@ -34,7 +36,16 @@ const NavBar = () => {
               key={link.to}
               to={link.to}
               end={link.to === "/"}
-              className={navLinkClassName}
+              className={({ isActive }) =>
+                [
+                  "rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition-all duration-300",
+                  isActive
+                    ? "bg-white text-black shadow-md"
+                    : `text-zinc-400 ${
+                        link.hover || "hover:text-white hover:bg-white/10"
+                      }`,
+                ].join(" ")
+              }
             >
               {link.label}
             </NavLink>
