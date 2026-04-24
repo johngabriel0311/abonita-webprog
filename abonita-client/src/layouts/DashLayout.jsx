@@ -112,8 +112,8 @@ const Drawer = styled(MuiDrawer, {
     ...openedMixin(theme),
     "& .MuiDrawer-paper": {
       ...openedMixin(theme),
-      backgroundColor: "#ececec", // 🔥 CHANGE COLOR HERE
-      color: "#000000", // text color
+      backgroundColor: "#ececec", 
+      color: "#000000", 
     },
   }),
 
@@ -121,7 +121,7 @@ const Drawer = styled(MuiDrawer, {
     ...closedMixin(theme),
     "& .MuiDrawer-paper": {
       ...closedMixin(theme),
-      backgroundColor: "#ececec", // 🔥 SAME HERE
+      backgroundColor: "#ececec", 
       color: "#000000",
     },
   }),
