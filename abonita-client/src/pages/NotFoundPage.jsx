@@ -3,7 +3,7 @@ import Button from "../components/Button";
 function NotFoundPage() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center px-8"
+      className="flex min-h-screen items-center justify-center px-8 bg-[#253b80]"
       style={{
         backgroundImage: "url('/src/assets/images/404.png')",
         backgroundSize: "cover",

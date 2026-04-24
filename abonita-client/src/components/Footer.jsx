@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="bg-zinc-900 text-zinc-300 mt-10 text-center">
@@ -9,11 +11,14 @@ const Footer = () => {
         </p>
         <div className="flex gap-4 mt-4 md:mt-0"></div>
       </div>
-      <img
-        src="/src/assets/images/logo.png"
-        alt="logo"
-        className="h-24 w-auto mt-4 md:mt-0 mb-8 mx-auto block"
-      />
+
+      <Link to="/dashboard">
+        <img
+          src="/src/assets/images/logo.png"
+          alt="logo"
+          className="h-24 w-auto mt-4 mb-8 mx-auto block"
+        />
+      </Link>
     </footer>
   );
 };
