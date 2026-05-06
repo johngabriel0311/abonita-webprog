@@ -8,6 +8,7 @@ import { Gauge } from "@mui/x-charts/Gauge";
 import { Typography, Card, CardContent } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import usersData from "../../data/users.json";
 import "leaflet/dist/leaflet.css";
 
 const columns = [
@@ -24,24 +25,14 @@ const columns = [
   },
 ];
 
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 14 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 31 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 31 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 11 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-];
+const rows = usersData;
 
 function DashboardPage() {
   const location = useLocation();
 
   const cardStyle = {
     flex: 1,
-    backgroundColor: "#ececec",
+    backgroundColor: "#ffffff",
     borderRadius: 3,
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
     transition: "all 0.3s ease",
@@ -59,14 +50,11 @@ function DashboardPage() {
         p: 2,
       }}
     >
-      {/* HEADER */}
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
         Dashboard Overview
       </Typography>
 
-      {/* SUMMARY */}
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 4 }}>
-        {/* Total Users */}
         <Card sx={cardStyle}>
           <CardContent>
             <Typography variant="h6" sx={{ color: "#253b80" }}>
@@ -84,27 +72,43 @@ function DashboardPage() {
             </Typography>
             <Typography variant="h4">
               {(
-                rows.reduce((sum, row) => sum + (row.age || 0), 0) /
+                rows.reduce((sum, row) => sum + Number(row.age || 0), 0) /
                 rows.filter((row) => row.age !== null).length
               ).toFixed(1)}
             </Typography>
           </CardContent>
         </Card>
 
-        {/* System Metrics (NEW POSITION) */}
         <Card sx={cardStyle}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, color: "#253b80" }}>
               System Metrics
             </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Box textAlign="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                mx: "auto",
+                width: "fit-content",
+              }}
+            >
+              <Box
+                sx={{
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <Gauge
                   width={110}
                   height={110}
                   value={60}
                   sx={{
+                    "& .MuiGauge-valueArc": {
+                      fill: "#253b80",
+                    },
                     "& .MuiGauge-valueText": {
                       fontSize: 20,
                       fontWeight: "bold",
@@ -116,12 +120,22 @@ function DashboardPage() {
                 </Typography>
               </Box>
 
-              <Box textAlign="center">
+              <Box
+                sx={{
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <Gauge
                   width={110}
                   height={110}
                   value={70}
                   sx={{
+                    "& .MuiGauge-valueArc": {
+                      fill: "#cd45a1",
+                    },
                     "& .MuiGauge-valueText": {
                       fontSize: 20,
                       fontWeight: "bold",
@@ -159,7 +173,7 @@ function DashboardPage() {
                 {
                   data: [51, 6, 49, 30],
                   label: "Students",
-                  color: "#ff91f2",
+                  color: "#cd45a1",
                 },
               ]}
               height={250}
@@ -180,7 +194,7 @@ function DashboardPage() {
                       id: 1,
                       value: 15,
                       label: "Instructors",
-                      color: "#ff91f2",
+                      color: "#cd45a1",
                     },
                     { id: 2, value: 20, label: "Students", color: "#68abec" },
                   ],
@@ -210,6 +224,7 @@ function DashboardPage() {
             <DataGrid
               rows={rows}
               columns={columns}
+              getRowId={(row) => row.username}
               pageSizeOptions={[5]}
               checkboxSelection
               sx={{

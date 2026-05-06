@@ -1,7 +1,7 @@
-import levels from "./images/levels.png";
-import quiz from "./images/quiz.png";
-import leaderboards from "./images/leaderboards.png";
-import badges from "./images/badges.png";
+import levels from "../assets/images/levels.png";
+import quiz from "../assets/images/quiz.png";
+import leaderboards from "../assets/images/leaderboards.png";
+import badges from "../assets/images/badges.png";
 
 const articles = [
   {
