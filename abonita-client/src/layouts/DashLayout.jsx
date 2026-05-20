@@ -21,6 +21,7 @@ import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PeopleIcon from "@mui/icons-material/People";
+import ArticleIcon from "@mui/icons-material/Article";
 import Button from "@mui/material/Button";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import SearchIcon from "@mui/icons-material/Search";
@@ -31,6 +32,16 @@ import MenuItem from "@mui/material/MenuItem";
 
 const drawerWidth = 240;
 
+const storedUser = localStorage.getItem("user");
+
+let currentUser = null;
+
+try {
+  currentUser = storedUser ? JSON.parse(storedUser) : null;
+} catch {
+  currentUser = null;
+}
+
 const dashboardNavItems = [
   {
     label: "Dashboard",
@@ -38,17 +49,36 @@ const dashboardNavItems = [
     to: "/dashboard",
     icon: DashboardIcon,
   },
+
   {
     label: "Reports",
     title: "Reports",
     to: "/dashboard/reports",
     icon: AssessmentIcon,
   },
+
+  ...(String(currentUser?.type || "").toLowerCase() === "admin"
+    ? [
+        {
+          label: "Users",
+
+          title: "Users",
+
+          to: "/dashboard/users",
+
+          icon: PeopleIcon,
+        },
+      ]
+    : []),
+
   {
-    label: "Users",
-    title: "Users",
-    to: "/dashboard/users",
-    icon: PeopleIcon,
+    label: "Articles",
+
+    title: "Articles",
+
+    to: "/dashboard/articles",
+
+    icon: ArticleIcon,
   },
 ];
 
@@ -178,7 +208,13 @@ const DashLayout = () => {
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
-  const handleLogout = () => navigate("/");
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
   const handleAvatarClick = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
@@ -225,6 +261,14 @@ const DashLayout = () => {
                 inputProps={{ "aria-label": "search" }}
               />
             </Search>
+            <div className="flex items-center gap-3 mr-4 text-white">
+              <span className="text-sm font-medium">
+                {currentUser?.firstName}, {"["}
+                {currentUser?.type?.charAt(0).toUpperCase() +
+                  currentUser?.type?.slice(1)}
+                {"]"}
+              </span>
+            </div>
 
             {/* User Avatar */}
             <Tooltip title="Account">

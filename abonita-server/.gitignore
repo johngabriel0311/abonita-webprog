@@ -1,0 +1,19 @@
+# Environment files
+.env
+*.env
+
+# Client env
+abonita-client/.env
+
+# Server env
+abonita-server/.env
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Logs
+npm-debug.log*

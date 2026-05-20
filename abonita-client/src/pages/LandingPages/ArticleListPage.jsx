@@ -1,23 +1,49 @@
+import { useEffect, useState } from "react";
+
 import Button from "../../components/Button.jsx";
 import ArticleList from "../../components/ArticleList.jsx";
-import articles from "../../data/article-content.js";
+
+import { fetchArticles } from "../../services/ArticleService";
 
 const ArticleListPage = () => {
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    loadArticles();
+  }, []);
+
+  const loadArticles = async () => {
+    try {
+      const { data } = await fetchArticles();
+
+      const activeArticles = (data.articles || []).filter(
+        (article) => article.isActive,
+      );
+
+      setArticles(activeArticles);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-6">
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
           Gameplay
         </p>
+
         <h1 className="max-w-xl text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl">
           E-LEARNING GAMIFICATION
         </h1>
+
         <p className="mt-4 max-w-lg text-sm leading-7 text-zinc-600 sm:text-base">
           Gamification has been widely recognized as an effective approach to
           increase student engagement in e-learning environments by integrating
           game elements such as points, badges, and challenges into educational
           content.
         </p>
+
         <div className="mt-6">
           <Button to="/">Back Home</Button>
         </div>
@@ -28,6 +54,7 @@ const ArticleListPage = () => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
             Featured Modules
           </p>
+
           <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
             Game Elements
           </h2>

@@ -1,17 +1,22 @@
 import { Outlet, useLocation } from "react-router-dom";
+
 import authorization from "../assets/images/authorization.png";
+
 import signin from "../assets/images/signin.png";
+
 import signup from "../assets/images/signup.png";
 
 const AuthLayout = () => {
   const location = useLocation();
+
   const isSignUp = location.pathname.includes("signup");
+
   const authBg = isSignUp ? signup : signin;
 
   return (
     <section className="min-h-screen bg-zinc-100 text-zinc-900">
-      <div className="grid min-h-screen w-full lg:grid-cols-[1fr_0.95fr]">
-        <div className="relative hidden h-screen w-full lg:block">
+      <div className="grid min-h-screen w-full lg:grid-cols-[1fr_0.95fr] items-stretch">
+        <div className="relative hidden min-h-screen w-full lg:block">
           <img
             src={authorization}
             alt="authorization"
@@ -19,7 +24,7 @@ const AuthLayout = () => {
           />
         </div>
 
-        <main className="relative flex items-center px-6 py-10 sm:px-10 lg:px-16 overflow-hidden">
+        <main className="relative flex min-h-screen items-center px-6 py-10 sm:px-10 lg:px-16 overflow-hidden">
           <img
             src={authBg}
             alt="auth background"

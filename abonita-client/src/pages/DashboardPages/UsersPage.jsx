@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import {
-  Alert,
   Box,
   Button,
   Chip,
@@ -22,15 +22,18 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import SearchIcon from "@mui/icons-material/Search";
-
 import { DataGrid } from "@mui/x-data-grid";
 
-import usersSeed from "../../data/users.json?raw";
+import { Navigate } from "react-router-dom";
+
+import SearchIcon from "@mui/icons-material/Search";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
+import { fetchUsers, createUser, updateUser } from "../../services/UserService";
 
 const roles = ["admin", "editor", "viewer"];
+
 const genders = ["male", "female", "other"];
 
 const blankForm = {
@@ -40,7 +43,7 @@ const blankForm = {
   gender: "",
   contactNumber: "",
   email: "",
-  role: "editor",
+  type: "editor",
   username: "",
   password: "",
   address: "",
@@ -50,61 +53,23 @@ const blankForm = {
 const labelize = (value) =>
   value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : "";
 
-const loadUsers = () => {
-  try {
-    return {
-      users: JSON.parse(usersSeed).map((user, index) => ({
-        id: Number(user.id) || index + 1,
-        firstName: String(user.firstName ?? "").trim(),
-        lastName: String(user.lastName ?? "").trim(),
-        age: String(user.age ?? "").trim(),
-        gender: genders.includes(
-          String(user.gender ?? "")
-            .trim()
-            .toLowerCase(),
-        )
-          ? String(user.gender ?? "")
-              .trim()
-              .toLowerCase()
-          : "",
-        contactNumber: String(user.contactNumber ?? "").trim(),
-        email: String(user.email ?? "")
-          .trim()
-          .toLowerCase(),
-        role: roles.includes(
-          String(user.role ?? "")
-            .trim()
-            .toLowerCase(),
-        )
-          ? String(user.role ?? "")
-              .trim()
-              .toLowerCase()
-          : "editor",
-        username: String(user.username ?? "")
-          .trim()
-          .toLowerCase(),
-        password: String(user.password ?? ""),
-        address: String(user.address ?? "").trim(),
-        isActive: typeof user.isActive === "boolean" ? user.isActive : true,
-      })),
-      error: "",
-    };
-  } catch {
-    return {
-      users: [],
-      error: "Unable to read users from src/data/users.json.",
-    };
-  }
-};
-
-const seed = loadUsers();
-
 const UsersPage = () => {
   const theme = useTheme();
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [users, setUsers] = useState(seed.users);
+  const storedUser = localStorage.getItem("user");
+
+  const currentUser =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
+  if (currentUser?.type === "editor") {
+    return <Navigate to="/dashboard" />;
+  }
+
+  const [users, setUsers] = useState([]);
+
+  const [loading, setLoading] = useState(true);
 
   const [modal, setModal] = useState({
     open: false,
@@ -120,24 +85,47 @@ const UsersPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
+
   const [roleFilter, setRoleFilter] = useState("");
+
   const [genderFilter, setGenderFilter] = useState("");
+
   const [statusFilter, setStatusFilter] = useState("");
 
-  const resetForm = () => {
-    setForm({ ...blankForm });
-    setErrors({});
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await fetchUsers();
+
+      setUsers(data.users);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
   const openModal = (user) => {
     setModal({
       open: true,
-      id: user?.id ?? null,
+      id: user?._id ?? null,
     });
 
-    setForm(user ? { ...blankForm, ...user } : { ...blankForm });
-
-    setErrors({});
+    setForm(
+      user
+        ? {
+            ...blankForm,
+            ...user,
+          }
+        : {
+            ...blankForm,
+          },
+    );
   };
 
   const closeModal = () => {
@@ -146,88 +134,48 @@ const UsersPage = () => {
       id: null,
     });
 
-    setShowPassword(false);
+    setForm({
+      ...blankForm,
+    });
 
-    resetForm();
+    setErrors({});
+
+    setShowPassword(false);
   };
 
-  const handleChange = ({ target: { name, value, checked, type } }) => {
+  const handleChange = (e) => {
+    const { name, value, checked, type } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
   };
 
   const validate = () => {
     const nextErrors = {};
 
-    const email = form.email.trim().toLowerCase();
-
-    const username = form.username.trim().toLowerCase();
-
-    [
-      ["firstName", "First name"],
-      ["lastName", "Last name"],
-      ["age", "Age"],
-      ["gender", "Gender"],
-      ["contactNumber", "Contact number"],
-      ["email", "Email"],
-      ["role", "Role"],
-      ["username", "User name"],
-      ["password", "Password"],
-      ["address", "Address"],
-    ].forEach(([key, label]) => {
-      if (!String(form[key]).trim()) {
-        nextErrors[key] = `${label} is required`;
-      }
-    });
-
-    if (!/^\d+$/.test(form.age)) {
-      nextErrors.age = "Age must contain numbers only";
+    if (form.password && form.password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters";
     }
 
     if (!/^\d{11}$/.test(form.contactNumber)) {
       nextErrors.contactNumber = "Contact number must be 11 digits";
     }
 
-    if (form.password.length < 8) {
-      nextErrors.password = "Password must be at least 8 characters";
+    if (!/^\d+$/.test(form.age)) {
+      nextErrors.age = "Age must contain numbers only";
     }
 
     if (/\s/.test(form.username)) {
       nextErrors.username = "Username must not contain spaces";
     }
 
-    if (!nextErrors.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      nextErrors.email = "Enter a valid email address";
-    }
-
-    if (
-      !nextErrors.email &&
-      users.some((user) => user.id !== modal.id && user.email === email)
-    ) {
-      nextErrors.email = "Email address already exists.";
-    }
-
-    if (
-      !nextErrors.username &&
-      users.some((user) => user.id !== modal.id && user.username === username)
-    ) {
-      nextErrors.username = "Username already exists.";
-    }
-
     return nextErrors;
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     const nextErrors = validate();
 
@@ -236,57 +184,57 @@ const UsersPage = () => {
       return;
     }
 
-    const nextUser = {
-      firstName: form.firstName.trim(),
-      lastName: form.lastName.trim(),
-      age: form.age.trim(),
-      contactNumber: form.contactNumber.trim(),
-      email: form.email.trim().toLowerCase(),
-      role: form.role.trim().toLowerCase(),
-      username: form.username.trim().toLowerCase(),
-      password: form.password,
-      address: form.address.trim(),
-      isActive: form.isActive,
-      gender: form.gender,
-    };
+    try {
+      const payload = {
+        firstName: form.firstName,
 
-    setUsers((prev) =>
-      modal.id
-        ? prev.map((user) =>
-            user.id === modal.id
-              ? {
-                  ...user,
-                  ...nextUser,
-                }
-              : user,
-          )
-        : [
-            ...prev,
-            {
-              id:
-                prev.reduce(
-                  (max, user) => Math.max(Number(user.id) || 0, max),
-                  0,
-                ) + 1,
-              ...nextUser,
-            },
-          ],
-    );
+        lastName: form.lastName,
 
-    closeModal();
+        age: form.age,
+
+        gender: form.gender,
+
+        contactNumber: form.contactNumber,
+
+        email: form.email,
+
+        type: form.type,
+
+        username: form.username,
+
+        password: form.password,
+
+        address: form.address,
+
+        isActive: form.isActive,
+      };
+
+      if (modal.id) {
+        await updateUser(modal.id, payload);
+      } else {
+        await createUser(payload);
+      }
+
+      await loadUsers();
+
+      closeModal();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const toggleStatus = (id) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id
-          ? {
-              ...user,
-              isActive: !user.isActive,
-            }
-          : user,
-      ),
-    );
+  const toggleStatus = async (id) => {
+    try {
+      const user = users.find((u) => u._id === id);
+
+      await updateUser(id, {
+        isActive: !user.isActive,
+      });
+
+      loadUsers();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -294,62 +242,68 @@ const UsersPage = () => {
       `${user.firstName} ${user.lastName}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRole = !roleFilter || user.role === roleFilter;
+    const matchesRole =
+      !roleFilter || user.type?.toLowerCase() === roleFilter.toLowerCase();
+
+    const matchesGender = !genderFilter || user.gender === genderFilter;
 
     const matchesStatus =
       !statusFilter ||
       (statusFilter === "active" && user.isActive) ||
       (statusFilter === "inactive" && !user.isActive);
 
-    const matchesGender = !genderFilter || user.gender === genderFilter;
-
-    return matchesSearch && matchesRole && matchesStatus && matchesGender;
-  });
-
-  const fieldProps = (name, label, extra = {}) => ({
-    name,
-    label,
-    value: form[name],
-    onChange: handleChange,
-    error: Boolean(errors[name]),
-    helperText: errors[name],
-    fullWidth: true,
-    ...extra,
+    return matchesSearch && matchesRole && matchesGender && matchesStatus;
   });
 
   const columns = [
     {
-      field: "id",
+      field: "_id",
       headerName: "ID",
-      width: 80,
+      width: 70,
+      align: "center",
+      headerAlign: "center",
+
+      renderCell: (params) =>
+        params.api.getRowIndexRelativeToVisibleRows(params.id) + 1,
     },
 
     {
       field: "fullName",
       headerName: "Full Name",
-      width: 170,
-      valueGetter: (_, row) => `${row.firstName} ${row.lastName}`.trim(),
+      flex: 1,
+      minWidth: 180,
+      align: "center",
+      headerAlign: "center",
+
+      valueGetter: (_, row) => `${row.firstName} ${row.lastName}`,
     },
 
     {
       field: "username",
       headerName: "Username",
-      minWidth: 150,
+      minWidth: 130,
+      align: "center",
+      headerAlign: "center",
     },
 
     {
       field: "age",
       headerName: "Age",
       width: 80,
+      align: "center",
+      headerAlign: "center",
     },
 
     {
       field: "gender",
       headerName: "Gender",
-      minWidth: 110,
+      minWidth: 100,
+      align: "center",
+      headerAlign: "center",
+
       valueGetter: (_, row) => labelize(row.gender),
     },
 
@@ -357,43 +311,46 @@ const UsersPage = () => {
       field: "contactNumber",
       headerName: "Contact Number",
       minWidth: 150,
+      align: "center",
+      headerAlign: "center",
     },
 
     {
       field: "email",
       headerName: "Email",
-      flex: 1.3,
-      minWidth: 150,
+      flex: 1,
+      minWidth: 220,
+      align: "center",
+      headerAlign: "center",
     },
 
     {
-      field: "role",
+      field: "type",
       headerName: "Role",
-      minWidth: 120,
-      valueGetter: (_, row) => labelize(row.role),
+      minWidth: 100,
+      align: "center",
+      headerAlign: "center",
+
+      valueGetter: (_, row) => labelize(row.type),
     },
 
     {
       field: "status",
       headerName: "Status",
       minWidth: 120,
-      sortable: false,
+      align: "center",
+      headerAlign: "center",
 
       renderCell: (params) => (
         <Chip
-          size="small"
           label={params.row.isActive ? "Active" : "Inactive"}
+          size="small"
           sx={{
-            width: 70,
+            width: 75,
+            height: 26,
             color: "#fff",
-            justifyContent: "center",
 
-            bgcolor: params.row.isActive ? "#cd45a1" : "#000000",
-
-            "& .MuiChip-label": {
-              width: "100%",
-              textAlign: "center",
-            },
+            bgcolor: params.row.isActive ? "#cd45a1" : "#000",
           }}
         />
       ),
@@ -402,9 +359,9 @@ const UsersPage = () => {
     {
       field: "actions",
       headerName: "Actions",
-      minWidth: 220,
-      sortable: false,
-      filterable: false,
+      minWidth: 190,
+      align: "center",
+      headerAlign: "center",
 
       renderCell: (params) => (
         <Stack
@@ -422,26 +379,37 @@ const UsersPage = () => {
             variant="contained"
             onClick={() => openModal(params.row)}
             sx={{
+              minWidth: 70,
+              height: 32,
+              fontSize: 12,
+
               bgcolor: "#253b80",
 
               "&:hover": {
-                bgcolor: "#ff91f2",
+                bgcolor: "#1d2f66",
               },
             }}
           >
-            Edit
+            EDIT
           </Button>
 
           <Button
             size="small"
             variant="contained"
-            onClick={() => toggleStatus(params.row.id)}
+            onClick={() => toggleStatus(params.row._id)}
             sx={{
-              width: 100,
-              bgcolor: params.row.isActive ? "#000000" : "#cd45a1",
+              minWidth: 95,
+              height: 32,
+              fontSize: 12,
+
+              bgcolor: params.row.isActive ? "#000" : "#cd45a1",
+
+              "&:hover": {
+                bgcolor: params.row.isActive ? "#222" : "#b93d92",
+              },
             }}
           >
-            {params.row.isActive ? "Deactivate" : "Activate"}
+            {params.row.isActive ? "DEACTIVATE" : "ACTIVATE"}
           </Button>
         </Stack>
       ),
@@ -449,20 +417,21 @@ const UsersPage = () => {
   ];
 
   return (
-    <Box sx={{ width: "100%", minWidth: 0 }}>
+    <Box>
       <Box
         sx={{
           mb: 3,
           display: "flex",
-          alignItems: "center",
           gap: 2,
           flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
         <Typography
           variant="h4"
           sx={{
             color: "#253b80",
+            fontWeight: "bold",
           }}
         >
           Users
@@ -476,34 +445,15 @@ const UsersPage = () => {
           sx={{
             flex: 1,
             minWidth: 250,
-
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
-
-              "& fieldset": {
-                borderColor: "#253b80",
-                borderWidth: 2,
-              },
-
-              "&:hover fieldset": {
-                borderColor: "#cd45a1",
-              },
-
-              "&.Mui-focused fieldset": {
-                borderColor: "#cd45a1",
-              },
-            },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon
-                  sx={{
-                    color: "#253b80",
-                  }}
-                />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
@@ -567,90 +517,68 @@ const UsersPage = () => {
           onClick={() => openModal()}
           sx={{
             bgcolor: "#253b80",
-            borderRadius: 2,
-            px: 3,
 
             "&:hover": {
-              bgcolor: "#ff91f2",
+              bgcolor: "#1d2f66",
             },
           }}
         >
-          Add User
+          ADD USER
         </Button>
       </Box>
 
-      {seed.error ? (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {seed.error}
-        </Alert>
-      ) : null}
-
       <Paper
         sx={{
-          p: { xs: 1.5, sm: 2 },
-          backgroundColor: "#f9fafc",
-          minWidth: 0,
-          overflow: "hidden",
           borderRadius: 3,
+          overflow: "hidden",
         }}
       >
-        {users.length ? (
-          <Box
-            sx={{
-              height: {
-                xs: 520,
-                sm: 550,
+        <Box
+          sx={{
+            height: 600,
+            width: "100%",
+          }}
+        >
+          <DataGrid
+            rows={filteredUsers}
+            columns={columns}
+            getRowId={(row) => row._id}
+            loading={loading}
+            rowHeight={55}
+            columnHeaderHeight={50}
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                  page: 0,
+                },
               },
-              width: "100%",
-              minWidth: 0,
             }}
-          >
-            <DataGrid
-              rows={filteredUsers}
-              columns={columns}
-              disableRowSelectionOnClick
-              pageSizeOptions={[5, 10]}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
-                    page: 0,
-                  },
-                },
-              }}
-              sx={{
-                minWidth: 0,
-                border: "none",
+            disableRowSelectionOnClick
+            sx={{
+              border: "none",
 
-                "& .MuiDataGrid-columnHeaders": {
-                  backgroundColor: "#253b80",
-                  color: "#253b80",
-                  fontWeight: "bold",
-                },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "#f8f9ff",
 
-                "& .MuiDataGrid-row:hover": {
-                  backgroundColor: "#f8e6f2",
-                },
+                color: "#253b80",
 
-                "& .MuiCheckbox-root.Mui-checked": {
-                  color: "#cd45a1",
-                },
+                fontWeight: "bold",
 
-                "& .MuiDataGrid-footerContainer": {
-                  borderTop: "2px solid #253b80",
-                },
+                borderBottom: "1px solid #dbe4ff",
+              },
 
-                "& .MuiDataGrid-cell, & .MuiDataGrid-columnHeader": {
-                  outline: "none",
-                },
-              }}
-            />
-          </Box>
-        ) : (
-          <Alert severity="info">
-            No users found. Use Add User to create your first record.
-          </Alert>
-        )}
+              "& .MuiDataGrid-cell": {
+                borderBottom: "1px solid #eef2ff",
+              },
+
+              "& .MuiDataGrid-footerContainer": {
+                borderTop: "1px solid #dbe4ff",
+              },
+            }}
+          />
+        </Box>
       </Paper>
 
       <Dialog
@@ -663,15 +591,7 @@ const UsersPage = () => {
         <Box component="form" onSubmit={handleSubmit}>
           <DialogTitle>{modal.id ? "Edit User" : "Add User"}</DialogTitle>
 
-          <DialogContent
-            dividers
-            sx={{
-              px: {
-                xs: 2,
-                sm: 3,
-              },
-            }}
-          >
+          <DialogContent dividers>
             <Stack spacing={2} sx={{ pt: 1 }}>
               <Stack
                 direction={{
@@ -680,46 +600,20 @@ const UsersPage = () => {
                 }}
                 spacing={2}
               >
-                <TextField {...fieldProps("firstName", "First Name")} />
-
-                <TextField {...fieldProps("lastName", "Last Name")} />
-              </Stack>
-
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
-                spacing={2}
-              >
-                <TextField {...fieldProps("age", "Age")} />
+                <TextField
+                  name="firstName"
+                  label="First Name"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
                 <TextField
-                  {...fieldProps("gender", "Gender", {
-                    select: true,
-                  })}
-                >
-                  {genders.map((gender) => (
-                    <MenuItem key={gender} value={gender}>
-                      {labelize(gender)}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Stack>
-
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
-                }}
-                spacing={2}
-              >
-                <TextField {...fieldProps("contactNumber", "Contact Number")} />
-
-                <TextField
-                  {...fieldProps("email", "Email Address", {
-                    type: "email",
-                  })}
+                  name="lastName"
+                  label="Last Name"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  fullWidth
                 />
               </Stack>
 
@@ -731,9 +625,63 @@ const UsersPage = () => {
                 spacing={2}
               >
                 <TextField
-                  {...fieldProps("role", "Role", {
-                    select: true,
-                  })}
+                  name="age"
+                  label="Age"
+                  value={form.age}
+                  onChange={handleChange}
+                  error={Boolean(errors.age)}
+                  helperText={errors.age}
+                  fullWidth
+                />
+
+                <TextField
+                  select
+                  name="gender"
+                  label="Gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  fullWidth
+                >
+                  {genders.map((gender) => (
+                    <MenuItem key={gender} value={gender}>
+                      {labelize(gender)}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+
+              <TextField
+                name="contactNumber"
+                label="Contact Number"
+                value={form.contactNumber}
+                onChange={handleChange}
+                error={Boolean(errors.contactNumber)}
+                helperText={errors.contactNumber}
+                fullWidth
+              />
+
+              <TextField
+                name="email"
+                label="Email"
+                value={form.email}
+                onChange={handleChange}
+                fullWidth
+              />
+
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
+                <TextField
+                  select
+                  name="type"
+                  label="Role"
+                  value={form.type}
+                  onChange={handleChange}
+                  fullWidth
                 >
                   {roles.map((role) => (
                     <MenuItem key={role} value={role}>
@@ -742,34 +690,47 @@ const UsersPage = () => {
                   ))}
                 </TextField>
 
-                <TextField {...fieldProps("username", "Username")} />
+                <TextField
+                  name="username"
+                  label="Username"
+                  value={form.username}
+                  onChange={handleChange}
+                  error={Boolean(errors.username)}
+                  helperText={errors.username}
+                  fullWidth
+                />
               </Stack>
 
               <TextField
-                {...fieldProps("password", "Password", {
-                  type: showPassword ? "text" : "password",
-
-                  InputProps: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          edge="end"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          onMouseDown={(event) => event.preventDefault()}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                })}
+                name="password"
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={handleChange}
+                error={Boolean(errors.password)}
+                helperText={errors.password}
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
 
               <TextField
-                {...fieldProps("address", "Address", {
-                  multiline: true,
-                  rows: 3,
-                })}
+                multiline
+                rows={3}
+                name="address"
+                label="Address"
+                value={form.address}
+                onChange={handleChange}
+                fullWidth
               />
 
               <FormControlLabel
@@ -780,21 +741,12 @@ const UsersPage = () => {
                     onChange={handleChange}
                   />
                 }
-                label={
-                  form.isActive
-                    ? "User status: Active"
-                    : "User status: Inactive"
-                }
+                label={form.isActive ? "User is Active" : "User is Inactive"}
               />
             </Stack>
           </DialogContent>
 
-          <DialogActions
-            sx={{
-              px: 3,
-              py: 2,
-            }}
-          >
+          <DialogActions>
             <Button onClick={closeModal}>Cancel</Button>
 
             <Button
@@ -804,11 +756,11 @@ const UsersPage = () => {
                 bgcolor: "#253b80",
 
                 "&:hover": {
-                  bgcolor: "#cd45a1",
+                  bgcolor: "#1d2f66",
                 },
               }}
             >
-              {modal.id ? "Update User" : "Save User"}
+              {modal.id ? "UPDATE USER" : "SAVE USER"}
             </Button>
           </DialogActions>
         </Box>
