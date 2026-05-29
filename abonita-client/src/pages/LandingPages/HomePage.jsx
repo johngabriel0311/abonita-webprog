@@ -1,4 +1,8 @@
 import Button from "../../components/Button";
+import welcomeImage from "../../assets/images/welcome.png";
+import signinImage from "../../assets/images/sign.png";
+import loginImage from "../../assets/images/login.png";
+import playImage from "../../assets/images/play.png";
 
 const HomePage = () => {
   return (
@@ -29,7 +33,7 @@ const HomePage = () => {
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex min-h-65 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
               <img
-                src="src/assets/images/welcome.png"
+                src={welcomeImage}
                 alt="Welcome"
                 className="w-full h-full object-cover"
               />
@@ -90,7 +94,7 @@ const HomePage = () => {
           <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
             <div className="overflow-hidden rounded-[1.25rem]">
               <img
-                src="src/assets/images/sign.png"
+                src={signinImage}
                 alt="Feature"
                 className="w-full h-full object-cover aspect-[4/3]"
               />
@@ -109,7 +113,7 @@ const HomePage = () => {
           <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
             <div className="overflow-hidden rounded-[1.25rem]">
               <img
-                src="src/assets/images/login.png"
+                src={loginImage}
                 alt="Feature"
                 className="w-full h-full object-cover aspect-[4/3]"
               />
@@ -126,7 +130,7 @@ const HomePage = () => {
           <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
             <div className="overflow-hidden rounded-[1.25rem]">
               <img
-                src="src/assets/images/play.png"
+                src={playImage}
                 alt="Feature"
                 className="w-full h-full object-cover aspect-[4/3]"
               />

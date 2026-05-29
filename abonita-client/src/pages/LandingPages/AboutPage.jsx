@@ -1,4 +1,9 @@
 import Button from "../../components/Button";
+import gameImage from "../../assets/images/game.png";
+import colorImage from "../../assets/images/color.png";
+import faceImage from "../../assets/images/face.png";
+import buildImage from "../../assets/images/build.png";
+import badgesImage from "../../assets/images/badges.png";
 
 const AboutPage = () => {
   return (
@@ -8,7 +13,7 @@ const AboutPage = () => {
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex min-h-65 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
               <img
-                src="src/assets/images/game.png"
+                src={gameImage}
                 alt="Game"
                 className="w-full h-full object-cover"
               />
@@ -134,28 +139,28 @@ const AboutPage = () => {
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div className="flex aspect-square items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
                 <img
-                  src="src/assets/images/color.png"
+                  src={colorImage}
                   alt="Color"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex aspect-square items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
                 <img
-                  src="src/assets/images/face.png"
+                  src={faceImage}
                   alt="Face"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex aspect-square items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
                 <img
-                  src="src/assets/images/build.png"
+                  src={buildImage}
                   alt="Build"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex aspect-square items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
                 <img
-                  src="src/assets/images/badges.png"
+                  src={badgesImage}
                   alt="Badges"
                   className="w-full h-full object-cover"
                 />

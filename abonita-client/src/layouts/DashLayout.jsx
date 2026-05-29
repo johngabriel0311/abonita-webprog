@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { styled, useTheme, alpha } from "@mui/material/styles";
+import logo from "../assets/images/logo.png";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
@@ -237,7 +238,7 @@ const DashLayout = () => {
             {/* Logo */}
             <Box
               component="img"
-              src="/src/assets/images/logo.png"
+              src={logo}
               alt="logo"
               sx={{ height: 36, mr: 2, display: { xs: "none", sm: "block" } }}
             />

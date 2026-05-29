@@ -1,3 +1,4 @@
+import logo from "../assets/images/logo.png";
 import { NavLink } from "react-router-dom";
 
 const links = [
@@ -23,7 +24,7 @@ const NavBar = () => {
         <NavLink to="/" className="flex items-center gap-3">
           <div className="space-y-0.5">
             <img
-              src="/src/assets/images/logo.png"
+              src={logo}
               alt="logo"
               className="h-12 w-auto transition-transform duration-300 hover:scale-110"
             />

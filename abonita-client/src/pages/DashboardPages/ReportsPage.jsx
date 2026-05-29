@@ -9,9 +9,8 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
-
+import html2canvas from "html2canvas";
 import SearchIcon from "@mui/icons-material/Search";
-
 import { BarChart } from "@mui/x-charts/BarChart";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { PieChart } from "@mui/x-charts/PieChart";
@@ -107,20 +106,24 @@ const ReportsPage = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printContent = printRef.current;
 
     if (!printContent) return;
 
+    const canvas = await html2canvas(printContent, {
+      scale: 2,
+      useCORS: true,
+    });
+
+    const image = canvas.toDataURL("image/png");
+
     const printWindow = window.open("", "_blank", "width=1200,height=900");
 
-    if (!printWindow) return;
-
-    const headMarkup = Array.from(
-      document.querySelectorAll('style, link[rel="stylesheet"]'),
-    )
-      .map((node) => node.outerHTML)
-      .join("");
+    if (!printWindow) {
+      alert("Please allow popups for this site.");
+      return;
+    }
 
     const exportedAt = new Intl.DateTimeFormat("en-US", {
       dateStyle: "long",
@@ -128,70 +131,59 @@ const ReportsPage = () => {
     }).format(new Date());
 
     printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-          />
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Print Report</title>
 
-          <title>Print Report</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f9fafc;
+          }
 
-          ${headMarkup}
+          .report-header {
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #253b80;
+          }
 
-          <style>
-            body {
-              margin: 0;
-              font-family: Arial, Helvetica, sans-serif;
-              background: #f9fafc;
-              color: #111827;
-            }
+          .report-header h1 {
+            color: #cd45a1;
+            margin: 0 0 6px;
+          }
 
-            .report-shell {
-              padding: 24px;
-            }
+          .report-header p {
+            margin: 0;
+            color: #6b7280;
+          }
 
-            .report-header {
-              margin-bottom: 24px;
-              padding-bottom: 14px;
-              border-bottom: 2px solid #253b80;
-            }
+          img {
+            width: 100%;
+            height: auto;
+          }
+        </style>
+      </head>
 
-            .report-header h1 {
-              color: #cd45a1;
-              margin: 0 0 6px;
-            }
+      <body>
+        <div class="report-header">
+          <h1>Hardware Arena Reports</h1>
+          <p>Generated on ${exportedAt}</p>
+        </div>
 
-            .report-header p {
-              margin: 0;
-              color: #6b7280;
-            }
-          </style>
-        </head>
-
-        <body>
-          <main class="report-shell">
-            <header class="report-header">
-              <h1>Hardware Arena Reports</h1>
-
-              <p>
-                Generated on ${exportedAt}
-              </p>
-            </header>
-
-            <section>
-              ${printContent.outerHTML}
-            </section>
-          </main>
-        </body>
-      </html>
-    `);
+        <img src="${image}" />
+      </body>
+    </html>
+  `);
 
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 500);
   };
 
   return (
@@ -244,19 +236,6 @@ const ReportsPage = () => {
         >
           <Button
             variant="contained"
-            sx={{
-              bgcolor: colors.primary,
-
-              "&:hover": {
-                bgcolor: "#1d2f66",
-              },
-            }}
-          >
-            Generate
-          </Button>
-
-          <Button
-            variant="contained"
             onClick={handlePrint}
             sx={{
               bgcolor: colors.accent,
@@ -267,25 +246,6 @@ const ReportsPage = () => {
             }}
           >
             Export PDF
-          </Button>
-
-          <Button
-            variant="outlined"
-            sx={{
-              borderColor: colors.primary,
-              color: colors.primary,
-              px: 4,
-              py: 1.5,
-              borderRadius: 2,
-
-              "&:hover": {
-                borderColor: colors.accent,
-                color: colors.accent,
-                backgroundColor: "#fdf2f8",
-              },
-            }}
-          >
-            Filter
           </Button>
         </Stack>
       </Stack>

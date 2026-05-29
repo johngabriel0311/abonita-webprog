@@ -1,3 +1,4 @@
+import logo from "../assets/images/logo.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -14,7 +15,7 @@ const Footer = () => {
 
       <Link to="/dashboard">
         <img
-          src="/src/assets/images/logo.png"
+          src={logo}
           alt="logo"
           className="h-24 w-auto mt-4 mb-8 mx-auto block"
         />
