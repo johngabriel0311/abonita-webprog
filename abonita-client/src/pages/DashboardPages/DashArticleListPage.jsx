@@ -463,7 +463,7 @@ const DashArticleListPage = () => {
                     <img
                       src={
                         typeof form.image === "string"
-                          ? `http://localhost:8000/uploads/${form.image}`
+                          ? `https://abonita-webprog-server.vercel.app/uploads/${form.image}`
                           : URL.createObjectURL(form.image)
                       }
                       alt=""

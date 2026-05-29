@@ -12,7 +12,7 @@ const ArticleList = ({ articles }) => {
         >
           {article.image && (
             <img
-              src={`http://localhost:8000/uploads/${article.image}`}
+              src={`https://abonita-webprog-server.vercel.app/uploads/${article.image}`}
               alt={article.title}
               className="aspect-4/3 w-full object-cover rounded-[1.25rem]"
             />
