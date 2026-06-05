@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="flex gap-4 mt-4 md:mt-0"></div>
       </div>
 
-      <Link to="/dashboard">
+      <Link to="/">
         <img
           src={logo}
           alt="logo"

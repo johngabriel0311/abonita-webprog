@@ -71,7 +71,7 @@ function ArticlePage() {
       <div className="max-w-4xl mx-auto px-6 py-10 text-center">
         {article.image && (
           <img
-            src={`https://abonita-webprog-server.vercel.app/uploads/${article.image}`}
+            src={`/uploads/${article.image}`}
             alt={article.title}
             className="w-full h-[480px] object-cover rounded-2xl border-2 border-zinc-900"
           />
