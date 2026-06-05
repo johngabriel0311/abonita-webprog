@@ -1,11 +1,13 @@
 import Button from "../components/Button";
+import bg404 from "../assets/images/404.png";
+import kira from "../assets/images/kira.png";
 
 function NotFoundPage() {
   return (
     <div
       className="flex min-h-screen items-center justify-center px-8 bg-[#253b80]"
       style={{
-        backgroundImage: "url('/src/assets/images/404.png')",
+        backgroundImage: `url(${bg404})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -25,11 +27,7 @@ function NotFoundPage() {
       </div>
 
       <div className="ml-16">
-        <img
-          src="/src/assets/images/kira.png"
-          alt="404 Not Found"
-          className="w-90"
-        />
+        <img src={kira} alt="404 Not Found" className="w-90" />
       </div>
     </div>
   );
